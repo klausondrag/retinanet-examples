@@ -171,7 +171,7 @@ def worker(rank, args, world, model, state):
 
 def main(args=None):
     'Entry point for the retinanet command'
-    print("Hello, World")
+    print("Hello, Sander")
     args = parse(args or sys.argv[1:])
 
     model, state = load_model(args, verbose=True)
