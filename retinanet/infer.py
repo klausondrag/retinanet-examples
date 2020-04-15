@@ -13,6 +13,13 @@ from .dali import DaliDataIterator
 from .model import Model
 from .utils import Profiler
 
+from pathlib import Path
+from typing import List
+
+import matplotlib.patches as patches
+from matplotlib import pyplot as plt
+from skimage import io
+
 def infer(model, path, detections_file, resize, max_size, batch_size, mixed_precision=True, is_master=True, world=0, annotations=None, use_dali=True, is_validation=False, verbose=True, logdir=None):
     'Run inference on images from path'
 
