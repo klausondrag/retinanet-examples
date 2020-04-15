@@ -213,7 +213,7 @@ def infer(model, path, detections_file, resize, max_size, batch_size, mixed_prec
                     ax.add_patch(rectangle)
 
                 ax.axis("off")
-                writer.add_figure('images/'+logtag, fig, i)
+                writer.add_figure('images', fig, i)
                 i += 1
 
             writer.close()
