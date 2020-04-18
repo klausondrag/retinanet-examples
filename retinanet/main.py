@@ -94,7 +94,7 @@ def load_model(args, verbose=False):
 
     elif args.command == 'infer' and ext in ['.engine', '.plan']:
         model = None
-
+    
     else:
         raise RuntimeError('Invalid model format "{}"!'.format(args.ext))
 
