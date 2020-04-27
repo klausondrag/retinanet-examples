@@ -57,6 +57,7 @@ def parse(args):
     parser_infer.add_argument('--max-size', metavar='max', type=int, help='maximum resizing size', default=1333)
     parser_infer.add_argument('--with-dali', help='use dali for data loading', action='store_true')
     parser_infer.add_argument('--full-precision', help='inference in full precision', action='store_true')
+    parser_infer.add_argument('--logdir', metavar='logdir', type=str, help='directory where to write logs')
 
     parser_export = subparsers.add_parser('export', help='export a model into a TensorRT engine')
     parser_export.add_argument('model', type=str, help='path to model')
@@ -133,7 +134,7 @@ def worker(rank, args, world, model, state):
 
         infer.infer(model, args.images, args.output, args.resize, args.max_size, args.batch,
             annotations=args.annotations, mixed_precision=not args.full_precision,
-            is_master=(rank == 0), world=world, use_dali=args.with_dali, verbose=(rank == 0))
+            is_master=(rank == 0), logdir=args.logdir, world=world, use_dali=args.with_dali, verbose=(rank == 0))
 
     elif args.command == 'export':
         onnx_only = args.export.split('.')[-1] == 'onnx'
