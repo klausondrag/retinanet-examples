@@ -134,8 +134,7 @@ def worker(rank, args, world, model, state):
 
         infer.infer(model, args.images, args.output, args.resize, args.max_size, args.batch,
             annotations=args.annotations, mixed_precision=not args.full_precision,
-            is_master=(rank == 0), world=world, use_dali=args.with_dali, verbose=(rank == 0),
-            logdir=args.logdir)
+            is_master=(rank == 0), logdir=args.logdir, world=world, use_dali=args.with_dali, verbose=(rank == 0))
 
     elif args.command == 'export':
         onnx_only = args.export.split('.')[-1] == 'onnx'
@@ -173,7 +172,7 @@ def worker(rank, args, world, model, state):
 
 def main(args=None):
     'Entry point for the retinanet command'
-    print("Hello, World")
+    print("Hello, Sander")
     args = parse(args or sys.argv[1:])
 
     model, state = load_model(args, verbose=True)

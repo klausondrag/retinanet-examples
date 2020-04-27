@@ -124,8 +124,8 @@ def train(model, state, path, annotations, val_path, val_annotations, resize, ma
                     print(msg, flush=True)
 
                 if logdir is not None:
-                    writer.add_scalar('focal_loss', focal_loss,  iteration)
-                    writer.add_scalar('box_loss', box_loss, iteration)
+                    writer.add_scalar('Train/Loss/Focal', focal_loss,  iteration)
+                    writer.add_scalar('Train/Loss/Box', box_loss, iteration)
                     writer.add_scalar('learning_rate', learning_rate, iteration)
                     del box_loss, focal_loss
 
@@ -151,7 +151,7 @@ def train(model, state, path, annotations, val_path, val_annotations, resize, ma
 
             if val_annotations and (iteration == iterations or iteration % val_iterations == 0):
                 infer(model, val_path, None, resize, max_size, batch_size, annotations=val_annotations,
-                    mixed_precision=mixed_precision, is_master=is_master, world=world, use_dali=use_dali, is_validation=True, verbose=False)
+                    mixed_precision=mixed_precision, is_master=is_master, world=world, use_dali=use_dali, is_validation=True, verbose=False, logdir=logdir, iteration=iteration)
                 model.train()
 
             if iteration == iterations:
