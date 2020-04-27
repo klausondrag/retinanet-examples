@@ -13,6 +13,14 @@ from .dali import DaliDataIterator
 from .model import Model
 from .utils import Profiler
 
+from pathlib import Path
+from typing import List
+
+import matplotlib.patches as patches
+from matplotlib import pyplot as plt
+from skimage import io
+
+
 def infer(model, path, detections_file, resize, max_size, batch_size, mixed_precision=True, is_master=True, world=0, annotations=None, use_dali=True, is_validation=False, verbose=True, logdir=None, iteration = 100):
     'Run inference on images from path'
 
@@ -161,3 +169,73 @@ def infer(model, path, detections_file, resize, max_size, batch_size, mixed_prec
                     writer.close()
         else:
             print('No detections!')
+
+        if logdir is not None and detections_file is not None:
+            from tensorboardX import SummaryWriter
+            if is_master and verbose:
+                print('Writing TensorBoard logs to: {}'.format(logdir))
+            writer = SummaryWriter(logdir=logdir)
+
+            def get_bounding_boxes(annotations: List, image_id: int) -> List:
+                return [a for a in annotations if a["image_id"] == image_id]
+
+
+            with open(detections_file, "r") as file:
+                all_detections = json.load(file)
+
+            with open(annotations, "r") as file:
+                all_ground_truths = json.load(file)
+
+            i = 0
+            for image_json in all_detections["images"][:3]:
+                image_id = image_json["id"]
+                image_path = path + '/' + image_json["file_name"]
+                image = io.imread(image_path)
+
+                assert (
+                    image_json["file_name"]
+                    == [x["file_name"] for x in all_ground_truths["images"] if x["id"] == image_id][
+                        0
+                    ]
+                )
+
+                fig, ax = plt.subplots(figsize=(16, 16))
+                ax.imshow(image)
+
+                detections = get_bounding_boxes(all_detections["annotations"], image_id)
+                detections = [d for d in detections if d["score"] > 0.5]
+
+                ground_truths = get_bounding_boxes(all_ground_truths["annotations"], image_id)
+
+                for d in detections:
+                    x, y, width, height = d["bbox"]
+                    score = d["score"]
+                    category_id = d["category_id"]
+
+                    rectangle = patches.Rectangle(
+                        (x, y), width, height, linewidth=2, edgecolor="r", facecolor="none",
+                    )
+                    ax.add_patch(rectangle)
+
+                    ax.text(
+                        x,
+                        y - 4,
+                        f"{category_id}: {score:0.2f}",
+                        color="r",
+                        fontsize=20,
+                        fontweight="bold",
+                    )
+
+                for gt in ground_truths:
+                    x, y, width, height = gt["bbox"]
+
+                    rectangle = patches.Rectangle(
+                        (x, y), width, height, linewidth=2, edgecolor="b", facecolor="none",
+                    )
+                    ax.add_patch(rectangle)
+
+                ax.axis("off")
+                writer.add_figure('images', fig, i)
+                i += 1
+
+            writer.close()
